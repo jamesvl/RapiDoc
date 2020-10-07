@@ -54,6 +54,9 @@ export default class SchemaTree extends LitElement {
         text-decoration: line-through; 
       }
 
+      .type-separator {
+        color:var(--fg);
+      }
       .open-bracket{
         display:inline-block;
         padding: 0 20px 0 0;
@@ -143,42 +146,47 @@ export default class SchemaTree extends LitElement {
     const minFieldColWidth = 400 - (indentLevel * leftPadding);
     let openBracket = '';
     let closeBracket = '';
+
+    const orNull = data['::nullable'] ? html`&nbsp;<span class="type-separator">|</span> <span class="null" style="display:inline;">null</span>` : '';
+    const orNullClass = data['::nullable'] ? ' or-null' : '';
+
     const newSchemaLevel = data['::type']?.startsWith('xxx-of') ? schemaLevel : (schemaLevel + 1);
     // const newIndentLevel = dataType === 'xxx-of-option' || data['::type'] === 'xxx-of-option' ? indentLevel : (indentLevel + 1);
     const newIndentLevel = dataType === 'xxx-of-option' || data['::type'] === 'xxx-of-option' || key.startsWith('::OPTION') ? indentLevel : (indentLevel + 1);
     if (data['::type'] === 'object') {
       if (dataType === 'array') {
         if (schemaLevel < this.schemaExpandLevel) {
-          openBracket = html`<span class="open-bracket array-of-object" @click="${this.toggleObjectExpand}">[{</span>`;
+          openBracket = html`<span class="open-bracket array-of-object${orNullClass}" @click="${this.toggleObjectExpand}">[{</span>`;
         } else {
-          openBracket = html`<span class="open-bracket array-of-object" @click="${this.toggleObjectExpand}">[{...}]</span>`;
+          openBracket = html`<span class="open-bracket array-of-object${orNullClass}" @click="${this.toggleObjectExpand}">[{...}]${orNull}</span>`;
         }
-        closeBracket = '}]';
+        closeBracket = html`}]${orNull}`;
       } else {
         if (schemaLevel < this.schemaExpandLevel) {
-          openBracket = html`<span class="open-bracket object" @click="${this.toggleObjectExpand}">{</span>`;
+          openBracket = html`<span class="open-bracket object${orNullClass}" @click="${this.toggleObjectExpand}">{</span>`;
         } else {
-          openBracket = html`<span class="open-bracket object" @click="${this.toggleObjectExpand}">{...}</span>`;
+          openBracket = html`<span class="open-bracket object${orNullClass}" @click="${this.toggleObjectExpand}">{...}${orNull}</span>`;
         }
-        closeBracket = '}';
+        closeBracket = html`}${orNull}`;
       }
     } else if (data['::type'] === 'array') {
       if (dataType === 'array') {
         if (schemaLevel < this.schemaExpandLevel) {
-          openBracket = html`<span class="open-bracket array-of-array" @click="${this.toggleObjectExpand}">[[</span>`;
+          openBracket = html`<span class="open-bracket array-of-array${orNullClass}" @click="${this.toggleObjectExpand}">[[</span>`;
         } else {
-          openBracket = html`<span class="open-bracket array-of-array" @click="${this.toggleObjectExpand}">[[...]]</span>`;
+          openBracket = html`<span class="open-bracket array-of-array${orNullClass}" @click="${this.toggleObjectExpand}">[[...]]</span>`;
         }
-        closeBracket = ']]';
+        closeBracket = html`]]${orNull}`;
       } else {
         if (schemaLevel < this.schemaExpandLevel) {
-          openBracket = html`<span class="open-bracket array" @click="${this.toggleObjectExpand}">[</span>`;
+          openBracket = html`<span class="open-bracket array${orNullClass}" @click="${this.toggleObjectExpand}">[</span>`;
         } else {
-          openBracket = html`<span class="open-bracket array" @click="${this.toggleObjectExpand}">[...]</span>`;
+          openBracket = html`<span class="open-bracket array${orNullClass}" @click="${this.toggleObjectExpand}">[...]</span>`;
         }
-        closeBracket = ']';
+        closeBracket = html`]${orNull}`;
       }
     }
+
     if (typeof data === 'object') {
       return html`
         <div class="tr ${schemaLevel < this.schemaExpandLevel || data['::type']?.startsWith('xxx-of') ? 'expanded' : 'collapsed'} ${data['::type'] || 'no-type-info'}">
@@ -242,6 +250,9 @@ export default class SchemaTree extends LitElement {
     if (readorWriteOnly === '🆆' && this.schemaHideWriteOnly === 'true') {
       return;
     }
+    const itemParts = data.split('~|~');
+    const itemOrNull = itemParts.includes('nullable') ? html`&nbsp;<span class="type-separator">|</span> <span class="null" style="display:inline;">null</span>` : ''; // @aravindanve
+
     const dataTypeCss = type.replace(/┃.*/g, '').replace(/[^a-zA-Z0-9+]/g, '').substring(0, 4).toLowerCase();
     return html`
       <div class = "tr primitive">
@@ -255,7 +266,7 @@ export default class SchemaTree extends LitElement {
                 : ''
           }
           <span class="${dataTypeCss}" > 
-            ${dataType === 'array' ? `[${type}]` : `${type}`}
+            ${dataType === 'array' ? html`[${type}${itemOrNull}]` : html`${type}${itemOrNull}`}
             ${readorWriteOnly}
           </span>
         </div>
@@ -283,6 +294,10 @@ export default class SchemaTree extends LitElement {
           : e.target.classList.contains('array')
             ? '[...]'
             : '{...}';
+
+      if (e.target.classList.contains('or-null')) { // @aravindanve
+        e.target.innerHTML += '&nbsp;<span class="type-separator">|</span> <span class="null" style="display:inline;">null</span>';
+      }
     } else {
       rowEl.classList.replace('collapsed', 'expanded');
       e.target.innerHTML = e.target.classList.contains('array-of-object')

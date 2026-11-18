@@ -447,13 +447,13 @@ describe("schemaToAST", () => {
       assert.strictEqual(schemaToAST(undefined), null);
     });
 
-    it("should cap recursion at level > 8 and mark truncated: true", () => {
+    it("should cap recursion at level > 30 and mark truncated: true", () => {
       const schema = {
         type: "object",
         description: "deeply nested",
         properties: { id: { type: "string" } },
       };
-      const ast = schemaToAST(schema, 9);
+      const ast = schemaToAST(schema, 31);
       assert.strictEqual(ast.truncated, true);
       assert.strictEqual(ast.properties, undefined);
     });
@@ -526,21 +526,21 @@ describe("schemaToAST", () => {
       );
     });
 
-    it("should expand objects down to JSON depth 8 and keep primitives below it", () => {
-      const ast = schemaToAST(nestedObject(10));
-      const level8 = childAt(ast, 8);
-      assert.strictEqual(level8.kind, "object");
-      assert.ok(!level8.truncated, "Object at depth 8 is expanded");
-      const level9 = childAt(ast, 9);
-      assert.strictEqual(level9.truncated, true, "Object at depth 9 is truncated");
-      assert.strictEqual(level9.properties, undefined);
-      assert.strictEqual(prop(level8, "id").kind, "primitive", "Primitive at depth 9 is shown");
-      assert.strictEqual(prop(level8, "id").type, "integer");
+    it("should expand objects down to JSON depth 30 and keep primitives below it", () => {
+      const ast = schemaToAST(nestedObject(32));
+      const level30 = childAt(ast, 30);
+      assert.strictEqual(level30.kind, "object");
+      assert.ok(!level30.truncated, "Object at depth 30 is expanded");
+      const level31 = childAt(ast, 31);
+      assert.strictEqual(level31.truncated, true, "Object at depth 31 is truncated");
+      assert.strictEqual(level31.properties, undefined);
+      assert.strictEqual(prop(level30, "id").kind, "primitive", "Primitive at depth 31 is shown");
+      assert.strictEqual(prop(level30, "id").type, "integer");
     });
 
     it("should truncate an array below the limit as an array", () => {
-      const ast = schemaToAST(nestedObject(10));
-      const tags = prop(childAt(ast, 8), "tags");
+      const ast = schemaToAST(nestedObject(32));
+      const tags = prop(childAt(ast, 30), "tags");
       assert.strictEqual(tags.kind, "array");
       assert.strictEqual(tags.truncated, true);
     });

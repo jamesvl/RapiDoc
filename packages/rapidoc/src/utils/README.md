@@ -107,7 +107,7 @@ UI helpers:
   `string`; example generation reads it, so labels must use `baseType` and `typeLabel`.
 - **Schema depth limits** (`[schema-utils.js]`): `schemaToSampleObj` returns `undefined` and
   `schemaInObjectNotation` returns a `::type` stub when `level > 8`. `schemaToAST` expands to
-  `MAX_SCHEMA_DEPTH` (8) and, while the tree exceeds `SCHEMA_NODE_BUDGET` (8000 nodes), retries
+  `MAX_SCHEMA_DEPTH` (30) and, while the tree exceeds `SCHEMA_NODE_BUDGET` (8000 nodes), retries
   with a smaller depth down to `MIN_SCHEMA_DEPTH` (4); cut containers become nodes with
   `truncated: true`. Its module state makes it synchronous and non-reentrant.
 - **Sanitization** (`[sanitize.js:sanitizeHTML]`): non-strings return `""`. The native

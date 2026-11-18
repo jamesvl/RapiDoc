@@ -1558,8 +1558,10 @@ function createPrimitiveAST(schema, name, isRequired) {
   };
 }
 
-// Deepest JSON nesting level expanded; anything below an object or array at this level is truncated
-const MAX_SCHEMA_DEPTH = 8;
+// Deepest JSON nesting level expanded; anything below an object or array at this level is truncated.
+// Semsee: raised from 8, which cut off the Questions nested in the Platform API's responses.
+// SCHEMA_NODE_BUDGET still shrinks the depth for very large trees.
+const MAX_SCHEMA_DEPTH = 30;
 // Largest tree built for one schema. A bigger tree (e.g. Stripe's expandable fields) is rebuilt one level shallower,
 // down to MIN_SCHEMA_DEPTH, so the page stays responsive
 const SCHEMA_NODE_BUDGET = 8000;
